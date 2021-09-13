@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/prop-types */
 /* eslint-disable id-length */
 /* eslint-disable react/jsx-fragments */
 /* eslint-disable consistent-return */
@@ -5,25 +7,22 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 import React from "react";
-import {useSelector} from 'react-redux'
+import {connect} from 'react-redux'
+import { bindActionCreators } from "redux";
+
 import { Alert, Spin } from "antd";
-import * as selectors from "../../selectors"
 
 import MyCard from "../Card";
+import * as actions from '../../actions'
 
-const Tickets = () => {
-    const perPage = useSelector(selectors.selectTicketsPerPage)
-    const currentTab = useSelector(selectors.selectCurrentTab)
-    const filters = useSelector(selectors.selectFilters)
-    const loading = useSelector(selectors.selectLoading)
-    const useAll = useSelector(selectors.selectUseAll)
+const Tickets = ( {perPage, currentTab, filters, loading, useAll, allTickets, firstBatch} ) => {
+    
     const { nonStop, oneStop, twoStops, threeStops } = filters
     const cheapest = 'cheapest'
     const fastest ='fastest'
-    const currentSelection = useAll ? selectors.selectAllTickets : selectors.selectFirstBatch
+    const currentSelection = !useAll ? firstBatch : allTickets
 
-
-    const tickets = useSelector(currentSelection)
+    const tickets = currentSelection
         .reduce((acc, cur)=> {
             const curLength = cur.segments[0].stops.length
             if (nonStop && !curLength) acc = [...acc, cur]
@@ -58,4 +57,22 @@ const Tickets = () => {
 }
 
 
-export default Tickets
+const mapStateToProps = state => ({
+    perPage: state.app.ticketsPerPage,
+    currentTab: state.app.currentTab, 
+    filters: state.filters, 
+    loading: state.app.loadingFirstBatch, 
+    useAll: state.app.useAll,
+    allTickets: state.tickets.allTickets,
+    firstBatch: state.tickets.firstBatch,
+})
+
+const mapDispatchToProps = dispatch => {
+    const boundActions = bindActionCreators(actions, dispatch)
+
+    return {
+        boundActions
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Tickets)

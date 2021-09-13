@@ -1,24 +1,23 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-expressions */
 
 import React from "react";
 import { Checkbox } from "antd";
 import "./filterslist.scss"
-import {useSelector, useDispatch} from "react-redux"
+import {connect} from "react-redux"
+import { bindActionCreators } from "redux";
 import * as actions from '../../actions'
-import { selectFilters, selectLoadedFull } from "../../selectors";
 
-const FiltersList = () => {
 
-    const activeFilters = useSelector(selectFilters)
-    const loadedFull = useSelector(selectLoadedFull)
-    const { nonStop, oneStop, twoStops, threeStops } = activeFilters
-    const { toggleAll, toggleNonStop, toggleOneStop, toggleTwoStops, toggleThreeStops, switchToAll } = actions
+const FiltersList = ({filters, loadedFull, boundActions}) => {
+
+    const { nonStop, oneStop, twoStops, threeStops } = filters
+    const { toggleAll, toggleNonStop, toggleOneStop, toggleTwoStops, toggleThreeStops, switchToAll } = boundActions
     const areAllChecked = [nonStop, oneStop, twoStops, threeStops].every(bool => bool)
-    const dispatch = useDispatch()
 
     const toggleFilter = (filter) => {
-        dispatch(filter)
-        loadedFull && dispatch(switchToAll)
+        filter()
+        loadedFull && switchToAll()
     }
     
     return (
@@ -42,4 +41,20 @@ const FiltersList = () => {
     )
 }
 
-export default FiltersList
+const mapDispatchToProps = dispatch => {
+    const boundActions = bindActionCreators(actions, dispatch);
+
+    return {
+        boundActions
+    }
+}
+
+
+const mapStateToProps = state => ({
+    filters: state.filters,
+    loadedFull: state.app.loadedFull
+})
+
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(FiltersList)

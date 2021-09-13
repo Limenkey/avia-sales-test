@@ -1,24 +1,27 @@
-/* eslint-disable id-length */
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-expressions */
+/* eslint-disable id-length */
 import React from "react";
 import { Button, Spin } from "antd";
-import { useDispatch, useSelector } from "react-redux"
+import { connect } from "react-redux"
+import { bindActionCreators } from "redux";
 import FiltersList from "../FiltersList";
 import Tickets from "../Tickets";
-import {switchToFastest, switchToCheapest, showMoreTickets, switchToAll} from "../../actions"
-import {selectLoadedFull, selectLoading, selectFilters} from "../../selectors"
+import * as actions from "../../actions"
+
+
 
 import logo from "./images/logo.svg"
 
 import 'antd/dist/antd.css'
 import './app.scss'
 
-const App = () => {
+
+const App = ({loadedFull, loading, filters, boundActions}) => {
     
-    const dispatch = useDispatch()
-    const loadedFull = useSelector(selectLoadedFull)
-    const loading = useSelector(selectLoading)
-    const filters = useSelector(selectFilters)
+
+    const {switchToFastest, switchToCheapest, showMoreTickets, switchToAll} = boundActions
+
 
     const switchTabs = (e) => {
         const clickedBtnClasses = e.target.closest('.navigation__btn').classList
@@ -27,13 +30,13 @@ const App = () => {
             clickedBtnClasses.add('navigation__btn--active')
         });
 
-        clickedBtnClasses.contains('navigation__btn--cheapest') ? dispatch(switchToCheapest) : dispatch(switchToFastest)
-        loadedFull && dispatch(switchToAll)
+        clickedBtnClasses.contains('navigation__btn--cheapest') ? switchToCheapest() : switchToFastest()
+        loadedFull && switchToAll()
     }
     
     const showMore = () => {
-        dispatch(showMoreTickets)
-        loadedFull && dispatch(switchToAll)
+        showMoreTickets()
+        loadedFull && switchToAll()
     }
 
     return (
@@ -75,7 +78,22 @@ const App = () => {
     )
 }
 
-export default App
+const mapStateToProps = state => ({
+    loadedFull: state.app.loadedFull,
+    loading: state.app.loading,
+    filters: state.filters
+})
+
+const mapDispatchToProps = dispatch => {
+    const boundActions = bindActionCreators(actions, dispatch)
+
+    return {
+        boundActions
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
 
 
 

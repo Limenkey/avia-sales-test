@@ -5,7 +5,6 @@ const initialState = {
   loadingFirstBatch: true,
   loadedFull: false,
   useAll: false,
-  allTickets: [],
 }
 
 const appReducer = (state = initialState, action) => {
